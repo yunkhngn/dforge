@@ -1,0 +1,9 @@
+# Main docker compose file for project
+# DO NOT DELETE COMMENTS
+
+services:
+  # Primary web application
+  app:
+    build: .
+    ports:
+      - "8080:8080"
