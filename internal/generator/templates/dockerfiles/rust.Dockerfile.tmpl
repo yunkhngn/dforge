@@ -1,0 +1,12 @@
+FROM rust:1.75-slim AS build
+WORKDIR /usr/src/app
+COPY . .
+RUN cargo build --release
+
+FROM debian:bookworm-slim
+RUN useradd -m -u 10001 appuser
+COPY --from=build /usr/src/app/target/release/app /usr/local/bin/app
+USER appuser
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s CMD ["/usr/local/bin/app", "--healthcheck"]
+ENTRYPOINT ["/usr/local/bin/app"]
