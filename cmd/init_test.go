@@ -27,6 +27,16 @@ func TestRunInitRefusesOverwriteWithoutForce(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected refusal to overwrite existing Dockerfile")
 	}
+	// The existing file must be untouched (no .bak from a partial write)...
+	if content, _ := os.ReadFile(filepath.Join(dir, "Dockerfile")); string(content) != "keep" {
+		t.Fatalf("existing Dockerfile was modified: %q", content)
+	}
+	// ...and no other artifact should have been written.
+	for _, f := range []string{"compose.yaml", ".dockerignore", "Dockerfile.bak"} {
+		if _, err := os.Stat(filepath.Join(dir, f)); err == nil {
+			t.Fatalf("partial write occurred: %s should not exist", f)
+		}
+	}
 }
 
 func TestPickFramework(t *testing.T) {

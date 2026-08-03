@@ -80,3 +80,52 @@ func TestCollectState(t *testing.T) {
 		t.Error("expected non-zero score for valid project")
 	}
 }
+
+func TestCollectStateDetectsPortConflictAndMissingVolume(t *testing.T) {
+	dir := t.TempDir()
+	compose := `services:
+  api:
+    ports:
+      - "3000:3000"
+    volumes:
+      - db_data:/var/lib/data
+  worker:
+    ports:
+      - "3000:9000"
+volumes: {}
+`
+	if err := os.WriteFile(filepath.Join(dir, "compose.yaml"), []byte(compose), 0644); err != nil {
+		t.Fatal(err)
+	}
+	state := CollectState(dir)
+	if len(state.PortConflicts) != 1 || state.PortConflicts[0] != "3000" {
+		t.Fatalf("want port conflict on 3000, got %v", state.PortConflicts)
+	}
+	if len(state.MissingVolumes) != 1 || state.MissingVolumes[0] != "db_data" {
+		t.Fatalf("want missing volume db_data, got %v", state.MissingVolumes)
+	}
+}
+
+func TestCollectStateCleanComposeHasNoConflicts(t *testing.T) {
+	dir := t.TempDir()
+	compose := `services:
+  api:
+    ports:
+      - "3000:3000"
+    volumes:
+      - db_data:/var/lib/data
+      - ./src:/app
+volumes:
+  db_data:
+`
+	if err := os.WriteFile(filepath.Join(dir, "compose.yaml"), []byte(compose), 0644); err != nil {
+		t.Fatal(err)
+	}
+	state := CollectState(dir)
+	if len(state.PortConflicts) != 0 {
+		t.Fatalf("expected no port conflicts, got %v", state.PortConflicts)
+	}
+	if len(state.MissingVolumes) != 0 {
+		t.Fatalf("expected no missing volumes (bind mount ./src ignored), got %v", state.MissingVolumes)
+	}
+}

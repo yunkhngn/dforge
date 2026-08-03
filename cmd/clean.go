@@ -18,7 +18,9 @@ func runClean(cl docker.Client, force, assumeYes bool) error {
 			return fmt.Errorf("clean aborted")
 		}
 	}
-	if err := cl.Clean(force); err != nil {
+	// Confirmation has already been handled here, so run non-interactively to
+	// avoid Docker prompting the user a second time.
+	if err := cl.Clean(true); err != nil {
 		return err
 	}
 	fmt.Println(ui.Success(ui.OK + " cleaned Docker resources"))

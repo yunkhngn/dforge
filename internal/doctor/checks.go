@@ -4,7 +4,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 func DefaultChecks() []Check {
@@ -36,6 +39,8 @@ func CollectState(root string) State {
 	}
 	_, dockerErr := exec.LookPath("docker")
 
+	portConflicts, missingVolumes := analyzeCompose(compose)
+
 	return State{
 		Root:             root,
 		DockerInstalled:  dockerErr == nil,
@@ -47,8 +52,86 @@ func CollectState(root string) State {
 		HasRestart:       strings.Contains(compose, "restart"),
 		UsesLatest:       strings.Contains(dockerfile, ":latest") || strings.Contains(compose, ":latest"),
 		RunsAsRoot:       dockerfile != "" && !strings.Contains(dockerfile, "USER "),
+		PortConflicts:    portConflicts,
+		MissingVolumes:   missingVolumes,
 		HasEnvFile:       exists(".env"),
 	}
+}
+
+// composeDoc is a minimal view of compose.yaml for static analysis.
+type composeDoc struct {
+	Services map[string]struct {
+		Ports   []string `yaml:"ports"`
+		Volumes []string `yaml:"volumes"`
+	} `yaml:"services"`
+	Volumes map[string]any `yaml:"volumes"`
+}
+
+// analyzeCompose returns host ports bound by more than one mapping and named
+// volumes referenced by a service but never declared under top-level `volumes:`.
+func analyzeCompose(compose string) (portConflicts, missingVolumes []string) {
+	if compose == "" {
+		return nil, nil
+	}
+	var doc composeDoc
+	if err := yaml.Unmarshal([]byte(compose), &doc); err != nil {
+		return nil, nil
+	}
+
+	portCount := map[string]int{}
+	missingSet := map[string]bool{}
+	for _, svc := range doc.Services {
+		for _, p := range svc.Ports {
+			if host := hostPort(p); host != "" {
+				portCount[host]++
+			}
+		}
+		for _, v := range svc.Volumes {
+			if name, ok := namedVolume(v); ok {
+				if _, declared := doc.Volumes[name]; !declared {
+					missingSet[name] = true
+				}
+			}
+		}
+	}
+
+	for host, n := range portCount {
+		if n > 1 {
+			portConflicts = append(portConflicts, host)
+		}
+	}
+	for name := range missingSet {
+		missingVolumes = append(missingVolumes, name)
+	}
+	sort.Strings(portConflicts)
+	sort.Strings(missingVolumes)
+	return portConflicts, missingVolumes
+}
+
+// hostPort extracts the host-side port from a compose short-syntax mapping,
+// e.g. "3000:3000" -> "3000", "127.0.0.1:8080:80" -> "8080", "80/tcp" -> "80".
+func hostPort(mapping string) string {
+	m := strings.SplitN(mapping, "/", 2)[0]
+	parts := strings.Split(m, ":")
+	switch len(parts) {
+	case 1:
+		return parts[0]
+	case 2:
+		return parts[0]
+	case 3:
+		return parts[1]
+	}
+	return ""
+}
+
+// namedVolume reports whether a volume mapping references a named volume
+// (as opposed to a bind mount starting with "." or "/") and returns its name.
+func namedVolume(mapping string) (string, bool) {
+	parts := strings.SplitN(mapping, ":", 2)
+	if len(parts) == 2 && !strings.HasPrefix(parts[0], ".") && !strings.HasPrefix(parts[0], "/") {
+		return parts[0], true
+	}
+	return "", false
 }
 
 func readFile(path string) string {

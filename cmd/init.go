@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/yunkhngn/dforge/internal/detect"
@@ -16,11 +18,25 @@ func runInit(root string, chosen detect.Framework, assumeYes bool) error {
 	if err != nil {
 		return err
 	}
+
+	// Pre-check every target so we never leave a half-generated project:
+	// either all files are written or none are.
+	if !assumeYes {
+		var existing []string
+		for name := range files {
+			if fsutil.Exists(filepath.Join(root, name)) {
+				existing = append(existing, name)
+			}
+		}
+		if len(existing) > 0 {
+			sort.Strings(existing)
+			return fmt.Errorf("refusing to overwrite existing files: %s (use --force to overwrite)",
+				strings.Join(existing, ", "))
+		}
+	}
+
 	for name, content := range files {
 		path := filepath.Join(root, name)
-		if fsutil.Exists(path) && !assumeYes {
-			return fmt.Errorf("%s already exists (use --force to overwrite)", name)
-		}
 		if err := fsutil.WriteWithBackup(path, []byte(content)); err != nil {
 			return err
 		}
