@@ -104,6 +104,22 @@ func (f *File) AddService(svc services.Service) error {
 	if len(svc.Volumes) > 0 {
 		add("volumes", seq(svc.Volumes))
 	}
+	if svc.Healthcheck != nil {
+		hcNode := &yaml.Node{Kind: yaml.MappingNode}
+		if len(svc.Healthcheck.Test) > 0 {
+			hcNode.Content = append(hcNode.Content, scalar("test"), seq(svc.Healthcheck.Test))
+		}
+		if svc.Healthcheck.Interval != "" {
+			hcNode.Content = append(hcNode.Content, scalar("interval"), scalar(svc.Healthcheck.Interval))
+		}
+		if svc.Healthcheck.Timeout != "" {
+			hcNode.Content = append(hcNode.Content, scalar("timeout"), scalar(svc.Healthcheck.Timeout))
+		}
+		if svc.Healthcheck.Retries > 0 {
+			hcNode.Content = append(hcNode.Content, scalar("retries"), scalar(fmt.Sprintf("%d", svc.Healthcheck.Retries)))
+		}
+		add("healthcheck", hcNode)
+	}
 	svcs.Content = append(svcs.Content, scalar(svc.Name), node)
 
 	// register named volumes at top level

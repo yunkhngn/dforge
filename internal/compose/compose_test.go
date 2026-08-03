@@ -91,6 +91,32 @@ func TestVolumeRegistration(t *testing.T) {
 	}
 }
 
+func TestAddServiceHealthcheck(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, "compose.yaml")
+	f, err := Load(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pg, ok := services.Get("postgres")
+	if !ok {
+		t.Fatal("postgres service not found in catalog")
+	}
+	if err := f.AddService(pg); err != nil {
+		t.Fatal(err)
+	}
+	out, err := f.Bytes()
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(out)
+	for _, substring := range []string{"healthcheck:", "test:", "pg_isready", "interval: 10s", "timeout: 5s", "retries: 5"} {
+		if !strings.Contains(s, substring) {
+			t.Fatalf("expected healthcheck output to contain %q, got:\n%s", substring, s)
+		}
+	}
+}
+
 func TestSaveCreatesBackup(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, "compose.yaml")
