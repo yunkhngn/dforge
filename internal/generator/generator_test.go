@@ -43,7 +43,7 @@ func TestRenderFrameworkPortsAndCompose(t *testing.T) {
 		detect.Nextjs:     "3000:3000",
 		detect.Nestjs:     "3000:3000",
 		detect.Express:    "3000:3000",
-		detect.React:      "80:80",
+		detect.React:      "8080:8080",
 		detect.Go:         "8080:8080",
 		detect.Rust:       "8080:8080",
 		detect.SpringBoot: "8080:8080",

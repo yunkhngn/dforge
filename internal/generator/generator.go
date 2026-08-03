@@ -17,7 +17,7 @@ type spec struct {
 var specs = map[detect.Framework]spec{
 	detect.Go:         {"templates/dockerfiles/go.Dockerfile.tmpl", "templates/dockerignore/go.dockerignore.tmpl", "8080:8080"},
 	detect.Nextjs:     {"templates/dockerfiles/nextjs.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl", "3000:3000"},
-	detect.React:      {"templates/dockerfiles/react.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl", "80:80"},
+	detect.React:      {"templates/dockerfiles/react.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl", "8080:8080"},
 	detect.Nestjs:     {"templates/dockerfiles/nestjs.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl", "3000:3000"},
 	detect.Express:    {"templates/dockerfiles/express.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl", "3000:3000"},
 	detect.SpringBoot: {"templates/dockerfiles/springboot.Dockerfile.tmpl", "templates/dockerignore/java.dockerignore.tmpl", "8080:8080"},
