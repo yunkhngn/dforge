@@ -1,0 +1,23 @@
+version: 2
+project_name: dforge
+builds:
+  - main: ./main.go
+    binary: dforge
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+checksum:
+  name_template: "checksums.txt"
+brews:
+  - name: dforge
+    repository:
+      owner: yunkhngn
+      name: homebrew-tap
+    homepage: "https://github.com/yunkhngn/dforge"
+    description: "One command to bootstrap, inspect and manage Docker Compose projects"
+    license: "MIT"
