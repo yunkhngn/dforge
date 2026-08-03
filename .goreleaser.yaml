@@ -18,6 +18,7 @@ brews:
     repository:
       owner: yunkhngn
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     homepage: "https://github.com/yunkhngn/dforge"
     description: "One command to bootstrap, inspect and manage Docker Compose projects"
     license: "MIT"
