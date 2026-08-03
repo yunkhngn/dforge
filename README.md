@@ -11,19 +11,19 @@ One command to bootstrap, inspect, and manage Docker Compose projects offline.
 
 ---
 
-## ✨ Features
+## Features
 
-- **🚀 Smart Stack Detection (`dforge init`)**: Automatically detects Next.js, React, NestJS, Express, Spring Boot, Go, and Rust projects.
-- **🛡️ Production-Grade Dockerfiles**: Generates multi-stage Dockerfiles with non-root users (`USER`), explicit `HEALTHCHECK` instructions, and pinned image tags (never `:latest`).
-- **💬 Comment-Preserving AST Editor (`dforge add` / `remove`)**: Add or remove services in `compose.yaml` while preserving existing comments, formatting, and top-level volume definitions.
-- **🩺 Automated Doctor (`dforge doctor`)**: Runs 12+ security and best-practice checks, outputting a weighted health score out of 100 with actionable feedback.
-- **🔒 Privacy-First Env Validator (`dforge env`)**: Compares `.env` against `.env.example` for missing, extra, or empty keys while **never printing variable values**.
-- **⚡ Runtime Container Wrapper (`status`, `logs`, `shell`, `clean`)**: Easily check container health, tail service logs, drop into shell sessions, or clean dangling Docker resources with interactive safety confirmation.
-- **🌐 100% Offline**: Zero telemetry, zero AI/cloud APIs, zero runtime network dependencies.
+- **Smart Stack Detection (`dforge init`)**: Automatically detects Next.js, React, NestJS, Express, Spring Boot, Go, and Rust projects.
+- **Production-Grade Dockerfiles**: Generates multi-stage Dockerfiles with non-root users (`USER`), explicit `HEALTHCHECK` instructions, and pinned image tags (never `:latest`).
+- **Comment-Preserving AST Editor (`dforge add` / `remove`)**: Add or remove services in `compose.yaml` while preserving existing comments, formatting, and top-level volume definitions.
+- **Automated Doctor (`dforge doctor`)**: Runs 12+ security and best-practice checks, outputting a weighted health score out of 100 with actionable feedback.
+- **Privacy-First Env Validator (`dforge env`)**: Compares `.env` against `.env.example` for missing, extra, or empty keys while **never printing variable values**.
+- **Runtime Container Wrapper (`status`, `logs`, `shell`, `clean`)**: Easily check container health, tail service logs, drop into shell sessions, or clean dangling Docker resources with interactive safety confirmation.
+- **100% Offline**: Zero telemetry, zero AI/cloud APIs, zero runtime network dependencies.
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Homebrew (macOS / Linux)
 
@@ -48,7 +48,7 @@ go build -o dforge main.go
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ### 1. Initialize a Project
 
@@ -106,7 +106,7 @@ dforge env
 
 ---
 
-## 🛠️ Command Reference
+## Command Reference
 
 | Command | Usage | Description |
 | :--- | :--- | :--- |
@@ -127,7 +127,7 @@ dforge env
 
 ---
 
-## 🗄️ Service Catalog
+## Service Catalog
 
 `dforge` comes with a built-in catalog of 8 pinned, production-ready infrastructure services:
 
@@ -144,7 +144,7 @@ dforge env
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 `dforge` follows a strict clean architecture:
 
@@ -169,7 +169,7 @@ internal/
 
 ---
 
-## 🧪 Testing
+## Testing
 
 Run the full unit test suite across all 10 packages:
 
@@ -185,6 +185,6 @@ go vet ./...
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](LICENSE).
