@@ -38,6 +38,47 @@ func TestRenderAllFrameworksProduceThreeFiles(t *testing.T) {
 	}
 }
 
+func TestRenderFrameworkPortsAndCompose(t *testing.T) {
+	expectedPorts := map[detect.Framework]string{
+		detect.Nextjs:     "3000:3000",
+		detect.Nestjs:     "3000:3000",
+		detect.Express:    "3000:3000",
+		detect.React:      "80:80",
+		detect.Go:         "8080:8080",
+		detect.Rust:       "8080:8080",
+		detect.SpringBoot: "8080:8080",
+	}
+
+	for fw, wantPort := range expectedPorts {
+		t.Run(string(fw), func(t *testing.T) {
+			out, err := Render(fw)
+			if err != nil {
+				t.Fatalf("unexpected error rendering %s: %v", fw, err)
+			}
+
+			compose := out["compose.yaml"]
+			expectedLine := "- \"" + wantPort + "\""
+			if !strings.Contains(compose, expectedLine) {
+				t.Errorf("compose.yaml for %s missing port %q, got:\n%s", fw, expectedLine, compose)
+			}
+			if strings.Contains(compose, "healthcheck:") || strings.Contains(compose, "curl") {
+				t.Errorf("compose.yaml for %s should not contain healthcheck block, got:\n%s", fw, compose)
+			}
+		})
+	}
+}
+
+func TestSpringBootDockerfileGradleAndMavenSupport(t *testing.T) {
+	out, err := Render(detect.SpringBoot)
+	if err != nil {
+		t.Fatalf("unexpected error rendering SpringBoot: %v", err)
+	}
+	df := out["Dockerfile"]
+	if !strings.Contains(df, "/app/dist/app.jar") {
+		t.Errorf("SpringBoot Dockerfile missing /app/dist/app.jar location, got:\n%s", df)
+	}
+}
+
 func TestRenderDockerfilesAreProductionGrade(t *testing.T) {
 	frameworks := []detect.Framework{
 		detect.Nextjs,

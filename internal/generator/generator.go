@@ -11,16 +11,17 @@ import (
 type spec struct {
 	dockerfile   string // template path
 	dockerignore string
+	port         string
 }
 
 var specs = map[detect.Framework]spec{
-	detect.Go:         {"templates/dockerfiles/go.Dockerfile.tmpl", "templates/dockerignore/go.dockerignore.tmpl"},
-	detect.Nextjs:     {"templates/dockerfiles/nextjs.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl"},
-	detect.React:      {"templates/dockerfiles/react.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl"},
-	detect.Nestjs:     {"templates/dockerfiles/nestjs.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl"},
-	detect.Express:    {"templates/dockerfiles/express.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl"},
-	detect.SpringBoot: {"templates/dockerfiles/springboot.Dockerfile.tmpl", "templates/dockerignore/java.dockerignore.tmpl"},
-	detect.Rust:       {"templates/dockerfiles/rust.Dockerfile.tmpl", "templates/dockerignore/rust.dockerignore.tmpl"},
+	detect.Go:         {"templates/dockerfiles/go.Dockerfile.tmpl", "templates/dockerignore/go.dockerignore.tmpl", "8080:8080"},
+	detect.Nextjs:     {"templates/dockerfiles/nextjs.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl", "3000:3000"},
+	detect.React:      {"templates/dockerfiles/react.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl", "80:80"},
+	detect.Nestjs:     {"templates/dockerfiles/nestjs.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl", "3000:3000"},
+	detect.Express:    {"templates/dockerfiles/express.Dockerfile.tmpl", "templates/dockerignore/node.dockerignore.tmpl", "3000:3000"},
+	detect.SpringBoot: {"templates/dockerfiles/springboot.Dockerfile.tmpl", "templates/dockerignore/java.dockerignore.tmpl", "8080:8080"},
+	detect.Rust:       {"templates/dockerfiles/rust.Dockerfile.tmpl", "templates/dockerignore/rust.dockerignore.tmpl", "8080:8080"},
 }
 
 func render(path string, data any) (string, error) {
@@ -45,7 +46,10 @@ func Render(fw detect.Framework) (map[string]string, error) {
 	if !ok {
 		return nil, fmt.Errorf("unsupported framework: %s", fw)
 	}
-	data := map[string]string{"Framework": string(fw)}
+	data := map[string]string{
+		"Framework": string(fw),
+		"Port":      s.port,
+	}
 	df, err := render(s.dockerfile, data)
 	if err != nil {
 		return nil, err
